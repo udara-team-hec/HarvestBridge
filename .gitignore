@@ -1,0 +1,20 @@
+# --- Security & API Keys ---
+.env
+.streamlit/secrets.toml
+
+# --- Databases & Vector Stores ---
+*.db
+*.sqlite
+*.sqlite3
+chroma_db/
+vector_store/
+
+# --- Standard Python & uv ---
+__pycache__/
+*.pyc
+.venv/
+.python-version
+
+# --- OS Specific Garbage ---
+.DS_Store
+Thumbs.db
