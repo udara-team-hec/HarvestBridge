@@ -44,11 +44,15 @@ class PriceData(BaseModel):
 
 
 class RiskData(BaseModel):
-    forecast_rainfall_7d_mm: float = Field(ge=0)
+    forecast_rainfall_near_mm: float = Field(ge=0, description="Total forecasted rainfall for days 1-2 in millimeters.")
+    forecast_rainfall_far_mm: float = Field(ge=0, description="Total forecasted rainfall for days 3-5 in millimeters.")
+    avg_humidity_pct: float = Field(ge=0, le=100, description="Average humidity across the full forecast window.")
+
     storage_spoilage_risk: RiskLevel
     road_passability_index: RiskLevel
     road_recovery_days: int = Field(ge=0, le=30)
-    harvest_urgency: RiskLevel = Field(description="Derived urgency to sell based on forecast rain and temperature. HIGH = sell now.")
+    harvest_urgency: RiskLevel
+
     weather_api_success: bool = Field(default=True)
     execution_log: Optional[AgentExecutionLog] = Field(default=None, exclude=True)
 
