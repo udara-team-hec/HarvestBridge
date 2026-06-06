@@ -14,7 +14,7 @@ CROP_COLUMN_MAP = {
 # Teff and Coffee are Ethiopia-only — confirm column names when Ethiopia data is loaded
 
 def analyze_price(crop: str, region: str) -> dict:
-    db_column = CROP_COLUMN_MAP.get(crop)
+    db_column = CROP_COLUMN_MAP.get(crop.lower())
     if not db_column:
         raise ValueError(f"Crop '{crop}' not found in database schema.")
 
