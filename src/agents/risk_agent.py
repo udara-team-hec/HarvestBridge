@@ -13,11 +13,17 @@ CROP_SPOILAGE_THRESHOLDS = {
 }
 DEFAULT_SPOILAGE_THRESHOLDS = {"high": 60.0, "medium": 30.0}
 
+STORAGE_SPOILAGE_MULTIPLIERS = {
+    "Traditional open bags": 1.4,
+    "Hermetic bags":         0.7,
+    "Warehouse / silo":      0.5,
+}
 
-def analyze_risk(weather_data: dict, crop: str) -> dict:
-    """Evaluates forecast weather facts to determine logistics risk."""
 
-    # 1. Handle the error state first
+def analyze_risk(weather_data: dict, crop: str, storage_type: str = "Traditional open bags") -> dict:
+    """Derives logistics risk from two-window weather data, crop type, and storage type."""
+
+    # 1. Handle API failure
     if weather_data.get("soil_condition_alert") == SoilCondition.UNKNOWN:
         return {
             "storage_spoilage_risk": RiskLevel.HIGH,
@@ -27,18 +33,16 @@ def analyze_risk(weather_data: dict, crop: str) -> dict:
             "weather_api_success": False
         }
 
-    future_rain = weather_data.get("future_rain_daily_mm", [])
+    near_rain = weather_data.get("forecast_rainfall_near_mm", 0.0)
+    far_rain = weather_data.get("forecast_rainfall_far_mm", 0.0)
+    avg_humidity = weather_data.get("avg_humidity_pct", 0.0)
 
-    # 2. Soil saturation bucket model — forecast only on free tier
-    current_saturation = 0.0
+    # 2. Soil saturation bucket model on near window only
+    # Near rain is what affects roads and storage right now
     evaporation_rate = 15.0
+    current_saturation = max(0.0, near_rain - evaporation_rate)
 
-    for daily_rain in future_rain:
-        current_saturation += daily_rain
-        current_saturation -= evaporation_rate
-        current_saturation = max(0.0, current_saturation)
-
-    # 3. Road passability from final saturation
+    # 3. Road passability from near saturation
     if current_saturation < 10.0:
         recovery_days = 0
         passability = RiskLevel.LOW
@@ -49,21 +53,25 @@ def analyze_risk(weather_data: dict, crop: str) -> dict:
         recovery_days = 5
         passability = RiskLevel.HIGH
 
-    # 4. Spoilage — crop-aware thresholds
+    # 4. Spoilage — crop-aware + storage-aware
     thresholds = CROP_SPOILAGE_THRESHOLDS.get(crop.lower(), DEFAULT_SPOILAGE_THRESHOLDS)
+    multiplier = STORAGE_SPOILAGE_MULTIPLIERS.get(storage_type, 1.0)
 
-    if current_saturation > thresholds["high"]:
+    # Humidity compounds moisture risk alongside rainfall
+    humidity_factor = 1.0 + max(0.0, (avg_humidity - 70) / 100)
+    adjusted_saturation = current_saturation * multiplier * humidity_factor
+
+    if adjusted_saturation > thresholds["high"]:
         spoilage = RiskLevel.HIGH
-    elif current_saturation > thresholds["medium"]:
+    elif adjusted_saturation > thresholds["medium"]:
         spoilage = RiskLevel.MEDIUM
     else:
         spoilage = RiskLevel.LOW
 
-    # 5. Harvest urgency — should the farmer sell before conditions worsen?
-    total_future_rain = sum(future_rain)
-    if total_future_rain > 40.0 or (spoilage == RiskLevel.HIGH and passability == RiskLevel.HIGH):
+    # 5. Harvest urgency — near rain = act now, far rain = act soon
+    if near_rain > 30.0 or (spoilage == RiskLevel.HIGH and passability == RiskLevel.HIGH):
         urgency = RiskLevel.HIGH
-    elif total_future_rain > 15.0 or passability == RiskLevel.MEDIUM:
+    elif far_rain > 20.0 or passability == RiskLevel.MEDIUM:
         urgency = RiskLevel.MEDIUM
     else:
         urgency = RiskLevel.LOW
@@ -78,13 +86,17 @@ def analyze_risk(weather_data: dict, crop: str) -> dict:
 
 
 async def risk_agent_node(state: dict) -> dict:
-    """The LangGraph wrapper for the Risk Engine."""
     start_time = time.time()
 
     weather_facts = state.get("weather_data", {})
     crop_input = state.get("crop")
+    storage_input = state.get("storage_type", "Traditional open bags")
 
-    risk_result = analyze_risk(weather_data=weather_facts, crop=crop_input)
+    risk_result = analyze_risk(
+        weather_data=weather_facts,
+        crop=crop_input,
+        storage_type=storage_input
+    )
 
     execution_time = time.time() - start_time
     risk_result["execution_log"] = {
