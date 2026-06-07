@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from src.agents.price_agent import analyze_price
 from src.agents.weather_agent import analyze_weather, get_coordinates
 from src.agents.risk_agent import analyze_risk
+from src.schemas.models import TrendDirection
 import os
 
 load_dotenv(override=True)
@@ -13,7 +14,7 @@ def test_price_agent_returns_real_data():
     assert result["avg_price"] > 0, "avg_price should be a real number from the database"
     assert result["price_12m_high"] >= result["avg_price"], "12m high should be >= average"
     assert result["price_12m_low"] <= result["avg_price"], "12m low should be <= average"
-    assert result["trend_direction"] in ["RISING", "FALLING", "STABLE"]
+    assert result["trend_direction"] in [TrendDirection.RISING, TrendDirection.FALLING, TrendDirection.STABLE]
     assert result["data_points_count"] > 0
     print(f"✓ Price Agent: {result}")
 
