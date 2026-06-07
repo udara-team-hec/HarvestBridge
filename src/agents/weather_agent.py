@@ -6,7 +6,6 @@ from src.schemas.models import SoilCondition
 
 
 def get_coordinates(region_name: str, api_key: str):
-    """Dynamically translates a region string into exact lat/lon floats."""
     geo_url = "http://api.openweathermap.org/geo/1.0/direct"
     payload = {"q": region_name, "limit": 1, "appid": api_key}
 
@@ -67,7 +66,6 @@ def analyze_weather(lat: float, lon: float, api_key: str) -> dict:
 
 
 async def weather_agent_node(state: dict) -> dict:
-    """The LangGraph wrapper for the Weather Engine."""
     start_time = time.time()
     region_input = state.get("location")   # aligned with GraphState key
 

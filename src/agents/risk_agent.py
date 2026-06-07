@@ -89,7 +89,6 @@ def analyze_risk(weather_data: dict, crop: str, storage_type: Optional[str] = No
 
 
 async def risk_agent_node(state: dict) -> dict:
-    """The LangGraph wrapper for the Risk Engine."""
     start_time = time.time()
 
     weather_facts = state.get("weather_data", {})
