@@ -2,7 +2,6 @@ import os
 import time
 import requests
 from datetime import datetime, timezone
-from collections import defaultdict
 from src.schemas.models import SoilCondition
 
 
@@ -26,13 +25,13 @@ def analyze_weather(lat: float, lon: float, api_key: str) -> dict:
         params={"lat": lat, "lon": lon, "appid": api_key, "units": "metric"}
     )
     forecast_list = response.json().get("list", [])
-    now = datetime.now()
+    now = datetime.now(tz=timezone.utc)
 
     near_rain, near_humidity = [], []
     far_rain, far_humidity = [], []
 
     for entry in forecast_list:
-        entry_time = datetime.fromtimestamp(entry["dt"])
+        entry_time = datetime.fromtimestamp(entry["dt"], tz=timezone.utc)
         days_ahead = (entry_time - now).total_seconds() / 86400
         rain = entry.get("rain", {}).get("3h", 0.0)
         humidity = entry.get("main", {}).get("humidity", 0.0)
@@ -44,12 +43,11 @@ def analyze_weather(lat: float, lon: float, api_key: str) -> dict:
             far_rain.append(rain)
             far_humidity.append(humidity)
 
-    near_rain_total = sum(near_rain)
-    far_rain_total = sum(far_rain)
+    near_rain_total = round(sum(near_rain), 2)
+    far_rain_total = round(sum(far_rain), 2)
     all_humidity = near_humidity + far_humidity
-    avg_humidity = sum(all_humidity) / max(len(all_humidity), 1)
+    avg_humidity = round(sum(all_humidity) / max(len(all_humidity), 1), 2)
 
-    # Soil condition based on combined rainfall
     total_rain = near_rain_total + far_rain_total
     if total_rain > 50.0:
         condition = SoilCondition.FLOOD_RISK
@@ -59,9 +57,9 @@ def analyze_weather(lat: float, lon: float, api_key: str) -> dict:
         condition = SoilCondition.OPTIMAL
 
     return {
-        "forecast_rainfall_near_mm": round(near_rain_total, 2),
-        "forecast_rainfall_far_mm": round(far_rain_total, 2),
-        "avg_humidity_pct": round(avg_humidity, 2),
+        "forecast_rainfall_near_mm": near_rain_total,
+        "forecast_rainfall_far_mm": far_rain_total,
+        "avg_humidity_pct": avg_humidity,
         "soil_condition_alert": condition,
         "weather_api_success": True
     }
@@ -69,7 +67,7 @@ def analyze_weather(lat: float, lon: float, api_key: str) -> dict:
 
 async def weather_agent_node(state: dict) -> dict:
     start_time = time.time()
-    region_input = state.get("location")
+    region_input = state.get("location")   # aligned with GraphState key
 
     api_key = os.getenv("OPENWEATHERMAP_API_KEY")
     if not api_key:

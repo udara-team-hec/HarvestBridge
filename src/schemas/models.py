@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 from typing import List, Optional
 
 
@@ -24,6 +24,7 @@ class SoilCondition(str, Enum):
     OPTIMAL = "OPTIMAL"
     UNKNOWN = "UNKNOWN"
 
+
 class AgentExecutionLog(BaseModel):
     agent_runtime: float = Field(description="Execution time in seconds.")
     success_status: bool = Field(description="Whether the agent completed successfully.")
@@ -38,21 +39,26 @@ class PriceData(BaseModel):
     trend_direction: TrendDirection
     price_12m_high: float
     price_12m_low: float
-    latest_data_date: str = Field(description="The date of the most recent price record. Format: YYYY-MM-DD.")
+    latest_data_date: str = Field(description="Most recent price record date. Format: YYYY-MM-DD.")
     data_points_count: int = Field(ge=1, description="Number of price records used in the calculation.")
     execution_log: Optional[AgentExecutionLog] = Field(default=None, exclude=True)
 
 
-class RiskData(BaseModel):
+class WeatherData(BaseModel):
     forecast_rainfall_near_mm: float = Field(ge=0, description="Total forecasted rainfall for days 1-2 in millimeters.")
     forecast_rainfall_far_mm: float = Field(ge=0, description="Total forecasted rainfall for days 3-5 in millimeters.")
     avg_humidity_pct: float = Field(ge=0, le=100, description="Average humidity across the full forecast window.")
+    soil_condition_alert: SoilCondition
+    weather_api_success: bool = Field(default=True)
+    execution_log: Optional[AgentExecutionLog] = Field(default=None, exclude=True)
 
+
+class RiskData(BaseModel):
     storage_spoilage_risk: RiskLevel
     road_passability_index: RiskLevel
     road_recovery_days: int = Field(ge=0, le=30)
-    harvest_urgency: RiskLevel
-
+    harvest_urgency: RiskLevel = Field(description="Derived urgency to sell. HIGH = sell now.")
+    storage_type: Optional[str] = Field(default=None, description="Farmer's storage method. None means no storage — produce sold directly from field.")
     weather_api_success: bool = Field(default=True)
     execution_log: Optional[AgentExecutionLog] = Field(default=None, exclude=True)
 
@@ -70,11 +76,3 @@ class NegotiationBrief(BaseModel):
     leverage_points: List[str] = Field(min_length=1)
     negotiation_script: List[str] = Field(min_length=1)
     confidence_score: int = Field(ge=1, le=10)
-    execution_log: Optional[AgentExecutionLog] = Field(default=None, exclude=True)
-
-
-class WeatherData(BaseModel):
-    past_rain_daily_mm: List[float]
-    future_rain_daily_mm: List[float]
-    soil_condition_alert: SoilCondition
-    execution_log: Optional[AgentExecutionLog] = Field(default=None, exclude=True)
