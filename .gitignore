@@ -18,3 +18,10 @@ __pycache__/
 # --- OS Specific Garbage ---
 .DS_Store
 Thumbs.db
+
+# RAG documents and vector store — never commit these
+rag/documents/
+rag/chroma_store/
+
+# Database
+data/harvestbridge.db
