@@ -3,11 +3,7 @@ import time
 import chromadb
 from chromadb.utils import embedding_functions
 from langchain_groq import ChatGroq
-<<<<<<< HEAD
 from src.schemas.models import ReportData
-=======
-from src.schemas.models import ReportData, AgentExecutionLog
->>>>>>> origin/main
 
 CHROMA_STORE_DIR = "rag/chroma_store"
 COLLECTION_NAME = "harvestbridge_knowledge"
@@ -35,8 +31,6 @@ def query_knowledge_base(crop: str, region: str, top_k: int = 3) -> dict:
     documents = results["documents"][0]
     distances = results["distances"][0]
 
-    # ChromaDB returns cosine distance (0=identical, 2=opposite)
-    # Convert to similarity score (1=identical, 0=opposite)
     top_similarity = round(1 - (distances[0] / 2), 4) if distances else 0.0
 
     return {
@@ -48,7 +42,6 @@ def query_knowledge_base(crop: str, region: str, top_k: int = 3) -> dict:
 def analyze_knowledge(crop: str, region: str) -> dict:
     """Runs RAG retrieval and extracts structured market intelligence."""
 
-    # 1. Get relevant chunks
     retrieval = query_knowledge_base(crop=crop, region=region)
     chunks = retrieval["chunks"]
     top_similarity = retrieval["top_similarity"]
@@ -60,7 +53,6 @@ def analyze_knowledge(crop: str, region: str) -> dict:
             "similarity_score": 0.0
         }
 
-    # 2. Synthesise with LLM
     llm = ChatGroq(
         model="llama-3.3-70b-versatile",
         temperature=0.1,
@@ -87,8 +79,6 @@ Do NOT fabricate numbers. Only report what the documents say.
 Set similarity_score to {top_similarity}."""
 
     result = structured_llm.invoke(prompt)
-
-    # Ensure similarity score comes from retrieval, not LLM
     result.similarity_score = top_similarity
 
     return {
@@ -98,25 +88,18 @@ Set similarity_score to {top_similarity}."""
     }
 
 
-<<<<<<< HEAD
-=======
-from src.schemas.models import ReportData  # AgentExecutionLog removed
-
-# ... rest of file unchanged ...
-
->>>>>>> origin/main
 async def knowledge_agent_node(state: dict) -> dict:
     """The LangGraph wrapper for the Knowledge Engine."""
     start_time = time.time()
 
     crop_input = state.get("crop")
-    region_input = state.get("region")    # ← fixed
+    region_input = state.get("region")
 
     try:
         report_result = analyze_knowledge(crop=crop_input, region=region_input)
         success = True
     except Exception as e:
-        print(f"Knowledge agent error: {e}")   # ← add this so failures aren't silent
+        print(f"Knowledge agent error: {e}")
         report_result = {
             "typical_middleman_discount_pct": None,
             "historical_context": None,
