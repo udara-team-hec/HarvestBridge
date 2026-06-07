@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 from src.schemas.models import RiskLevel, SoilCondition
 
 CROP_SPOILAGE_THRESHOLDS = {
@@ -17,49 +18,50 @@ STORAGE_SPOILAGE_MULTIPLIERS = {
     "Traditional open bags": 1.4,
     "Hermetic bags":         0.7,
     "Warehouse / silo":      0.5,
+    None:                    1.0,   # no storage / field sale = baseline
 }
 
 
-def analyze_risk(weather_data: dict, crop: str, storage_type: str = "Traditional open bags") -> dict:
+def analyze_risk(weather_data: dict, crop: str, storage_type: Optional[str] = None) -> dict:
     """Derives logistics risk from two-window weather data, crop type, and storage type."""
 
-    # 1. Handle API failure
+    # 1. Handle API failure state
     if weather_data.get("soil_condition_alert") == SoilCondition.UNKNOWN:
         return {
             "storage_spoilage_risk": RiskLevel.HIGH,
             "road_passability_index": RiskLevel.HIGH,
             "road_recovery_days": 0,
             "harvest_urgency": RiskLevel.HIGH,
+            "storage_type": storage_type,
             "weather_api_success": False
         }
 
+    # 2. Read the two pre-summed windows from WeatherData
     near_rain = weather_data.get("forecast_rainfall_near_mm", 0.0)
     far_rain = weather_data.get("forecast_rainfall_far_mm", 0.0)
     avg_humidity = weather_data.get("avg_humidity_pct", 0.0)
 
-    # 2. Soil saturation bucket model on near window only
-    # Near rain is what affects roads and storage right now
-    evaporation_rate = 15.0
-    current_saturation = max(0.0, near_rain - evaporation_rate)
+    # 3. Road passability — driven by near-term rain only
+    # Near rain represents imminent road conditions
+    near_saturation = max(0.0, near_rain - 15.0)  # single evaporation step
 
-    # 3. Road passability from near saturation
-    if current_saturation < 10.0:
+    if near_saturation < 10.0:
         recovery_days = 0
         passability = RiskLevel.LOW
-    elif current_saturation <= 50.0:
+    elif near_saturation <= 50.0:
         recovery_days = 2
         passability = RiskLevel.MEDIUM
     else:
         recovery_days = 5
         passability = RiskLevel.HIGH
 
-    # 4. Spoilage — crop-aware + storage-aware
+    # 4. Spoilage — crop-aware + storage-aware + humidity-aware
     thresholds = CROP_SPOILAGE_THRESHOLDS.get(crop.lower(), DEFAULT_SPOILAGE_THRESHOLDS)
     multiplier = STORAGE_SPOILAGE_MULTIPLIERS.get(storage_type, 1.0)
 
-    # Humidity compounds moisture risk alongside rainfall
-    humidity_factor = 1.0 + max(0.0, (avg_humidity - 70) / 100)
-    adjusted_saturation = current_saturation * multiplier * humidity_factor
+    # Humidity above 70% compounds moisture damage risk
+    humidity_factor = 1.0 + max(0.0, (avg_humidity - 70.0) / 100.0)
+    adjusted_saturation = near_saturation * multiplier * humidity_factor
 
     if adjusted_saturation > thresholds["high"]:
         spoilage = RiskLevel.HIGH
@@ -81,6 +83,7 @@ def analyze_risk(weather_data: dict, crop: str, storage_type: str = "Traditional
         "road_passability_index": passability,
         "road_recovery_days": recovery_days,
         "harvest_urgency": urgency,
+        "storage_type": storage_type,
         "weather_api_success": True
     }
 
@@ -90,7 +93,7 @@ async def risk_agent_node(state: dict) -> dict:
 
     weather_facts = state.get("weather_data", {})
     crop_input = state.get("crop")
-    storage_input = state.get("storage_type", "Traditional open bags")
+    storage_input = state.get("storage_type", None)
 
     risk_result = analyze_risk(
         weather_data=weather_facts,
