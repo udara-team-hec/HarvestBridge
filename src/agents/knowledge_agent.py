@@ -3,7 +3,11 @@ import time
 import chromadb
 from chromadb.utils import embedding_functions
 from langchain_groq import ChatGroq
+<<<<<<< HEAD
 from src.schemas.models import ReportData
+=======
+from src.schemas.models import ReportData, AgentExecutionLog
+>>>>>>> origin/main
 
 CHROMA_STORE_DIR = "rag/chroma_store"
 COLLECTION_NAME = "harvestbridge_knowledge"
@@ -94,6 +98,13 @@ Set similarity_score to {top_similarity}."""
     }
 
 
+<<<<<<< HEAD
+=======
+from src.schemas.models import ReportData  # AgentExecutionLog removed
+
+# ... rest of file unchanged ...
+
+>>>>>>> origin/main
 async def knowledge_agent_node(state: dict) -> dict:
     """The LangGraph wrapper for the Knowledge Engine."""
     start_time = time.time()
