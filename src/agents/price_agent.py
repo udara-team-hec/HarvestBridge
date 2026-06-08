@@ -55,7 +55,7 @@ def analyze_price(crop: str, region: str, currency: str = "NGN") -> dict:
             "trend_direction": TrendDirection.STABLE,
             "price_12m_high": 0.0,
             "price_12m_low": 0.0,
-            "latest_data_date": "unknown",
+            "latest_data_date": latest_date.split(" ")[0] if latest_date else "unknown",
             "data_points_count": 0,
         }
 
