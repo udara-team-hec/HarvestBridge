@@ -24,4 +24,8 @@ rag/documents/
 rag/chroma_store/
 
 # Database
+data/raw/
 data/harvestbridge.db
+
+# UI
+.streamlit/

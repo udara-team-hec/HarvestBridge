@@ -3,51 +3,51 @@ LOCATIONS = {
         "currency": "NGN",
         "states": {
             "Kano": {
-                "Kano City":     "Kano, Kano, NG",
-                "Wudil":         "Wudil, Kano, NG",
-                "Gwarzo":        "Gwarzo, Kano, NG",
+                "Kano City": "Kano, Nigeria",
+                "Wudil":     "Wudil, Kano, Nigeria",
+                "Gwarzo":    "Gwarzo, Kano, Nigeria",
             },
             "Lagos": {
-                "Lagos Market":  "Lagos, Lagos, NG",
-                "Badagry":       "Badagry, Lagos, NG",
+                "Lagos Market": "Lagos, Nigeria",
+                "Badagry":      "Badagry, Lagos, Nigeria",
             },
             "Kaduna": {
-                "Kaduna City":   "Kaduna, Kaduna, NG",
-                "Zaria":         "Zaria, Kaduna, NG",
-                "Saminaka":      "Saminaka, Kaduna, NG",
+                "Kaduna City": "Kaduna, Nigeria",
+                "Zaria":       "Zaria, Kaduna, Nigeria",
+                "Saminaka":    "Saminaka, Kaduna, Nigeria",
             },
             "Katsina": {
-                "Katsina City":  "Katsina, Katsina, NG",
-                "Dandume":       "Dandume, Katsina, NG",
-                "Daura":         "Daura, Katsina, NG",
+                "Katsina City": "Katsina, Nigeria",
+                "Dandume":      "Dandume, Katsina, Nigeria",
+                "Daura":        "Daura, Katsina, Nigeria",
             },
             "Borno": {
-                "Maiduguri":     "Maiduguri, Borno, NG",
-                "Biu":           "Biu, Borno, NG",
-                "Damboa":        "Damboa, Borno, NG",
+                "Maiduguri": "Maiduguri, Nigeria",
+                "Biu":       "Biu, Borno, Nigeria",
+                "Damboa":    "Damboa, Borno, Nigeria",
             },
             "Yobe": {
-                "Damaturu":      "Damaturu, Yobe, NG",
-                "Potiskum":      "Potiskum, Yobe, NG",
-                "Gashua":        "Gashua, Yobe, NG",
+                "Damaturu": "Damaturu, Nigeria",
+                "Potiskum": "Potiskum, Yobe, Nigeria",
+                "Gashua":   "Gashua, Yobe, Nigeria",
             },
             "Adamawa": {
-                "Jimeta":        "Jimeta, Adamawa, NG",
-                "Mubi":          "Mubi, Adamawa, NG",
-                "Michika":       "Michika, Adamawa, NG",
+                "Jimeta":  "Jimeta, Adamawa, Nigeria",
+                "Mubi":    "Mubi, Adamawa, Nigeria",
+                "Michika": "Michika, Adamawa, Nigeria",
             },
             "Oyo": {
-                "Ibadan":        "Ibadan, Oyo, NG",
+                "Ibadan": "Ibadan, Nigeria",
             },
             "Abia": {
-                "Aba":           "Aba, Abia, NG",
+                "Aba": "Aba, Nigeria",
             },
             "Gombe": {
-                "Gombe City":    "Gombe, Gombe, NG",
+                "Gombe City": "Gombe, Nigeria",
             },
             "Sokoto": {
-                "Illela":        "Illela, Sokoto, NG",
-                "Sokoto City":   "Sokoto, Sokoto, NG",
+                "Illela":      "Illela, Sokoto, Nigeria",
+                "Sokoto City": "Sokoto, Nigeria",
             },
         }
     },
@@ -55,27 +55,27 @@ LOCATIONS = {
         "currency": "ETB",
         "states": {
             "Amhara": {
-                "Bahir Dar":     "Bahir Dar, Amhara, ET",
-                "Gondar":        "Gondar, Amhara, ET",
-                "Dessie":        "Dessie, Amhara, ET",
-                "Debre Birhan":  "Debre Birhan, Amhara, ET",
+                "Bahir Dar":    "Bahir Dar, Ethiopia",
+                "Gondar":       "Gondar, Ethiopia",
+                "Dessie":       "Dessie, Ethiopia",
+                "Debre Birhan": "Debre Birhan, Ethiopia",
             },
             "Oromia": {
-                "Jimma":         "Jimma, Oromia, ET",
-                "Adama":         "Adama, Oromia, ET",
-                "Assela":        "Assela, Oromia, ET",
-                "Chiro":         "Chiro, Oromia, ET",
+                "Jimma":  "Jimma, Ethiopia",
+                "Adama":  "Adama, Ethiopia",
+                "Assela": "Assela, Ethiopia",
+                "Chiro":  "Chiro, Ethiopia",
             },
             "Addis Ababa": {
-                "Addis Ababa":   "Addis Ababa, ET",
+                "Addis Ababa": "Addis Ababa, Ethiopia",
             },
             "SNNPR": {
-                "Hawassa":       "Hawassa, SNNPR, ET",
-                "Arba Minch":    "Arba Minch, SNNPR, ET",
+                "Hawassa":    "Hawassa, Ethiopia",
+                "Arba Minch": "Arba Minch, Ethiopia",
             },
             "Tigray": {
-                "Mekelle":       "Mekelle, Tigray, ET",
-                "Axum":          "Axum, Tigray, ET",
+                "Mekelle": "Mekelle, Ethiopia",
+                "Axum":    "Axum, Ethiopia",
             },
         }
     }
