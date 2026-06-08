@@ -99,7 +99,7 @@ def update_trace(placeholders: dict, stage: str):
             placeholders[s].empty()
 
 
-def render_results(result: dict, currency: str):
+def render_results(result: dict, currency: str, quantity_kg: float = 0):
     """Renders the full results panel from pipeline output."""
     brief        = result.get("negotiation_brief", {})
     price_data   = result.get("price_data", {})
@@ -119,14 +119,23 @@ def render_results(result: dict, currency: str):
     # Price range and floor
     col1, col2 = st.columns(2)
     with col1:
-        st.metric(
-            label="Fair Price Range",
-            value=brief.get("fair_price_range", "N/A")
-        )
+        st.markdown("**Fair Price Range**")
+        st.markdown(f"### {brief.get('fair_price_range', 'N/A')}")
     with col2:
         st.metric(
             label="Minimum Acceptable Price",
             value=f"{brief.get('minimum_acceptable_price', 0):,.0f} {currency}"
+        )
+
+    # Total harvest value
+    if quantity_kg > 0:
+        avg_price = price_data.get("avg_price", 0)
+        min_price = brief.get("minimum_acceptable_price", 0)
+        total_fair = avg_price * quantity_kg
+        total_min  = min_price * quantity_kg
+        st.caption(
+            f"💰 Total harvest value at fair price: {total_fair:,.0f} {currency} · "
+            f"Minimum total: {total_min:,.0f} {currency}"
         )
 
     st.divider()
@@ -209,7 +218,6 @@ def render_results(result: dict, currency: str):
             context = report_data.get("historical_context")
             if context:
                 st.write(f"Context: {context}")
-
 
 def render_empty_state():
     """Renders the landing screen before any brief is generated."""

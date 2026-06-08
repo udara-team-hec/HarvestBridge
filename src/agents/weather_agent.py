@@ -78,7 +78,8 @@ async def weather_agent_node(state: dict) -> dict:
         weather_result = analyze_weather(lat=lat, lon=lon, api_key=api_key)
         success = True
 
-    except (ValueError, requests.RequestException):
+    except (ValueError, requests.RequestException) as e:
+        print(f"Weather agent failed: {type(e).__name__}: {e}")
         weather_result = {
             "forecast_rainfall_near_mm": 0.0,
             "forecast_rainfall_far_mm": 0.0,
