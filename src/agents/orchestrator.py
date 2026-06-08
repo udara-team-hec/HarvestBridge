@@ -126,27 +126,29 @@ Write for a farmer, not a trader. Plain language. No financial jargon."""
 
 
 async def orchestrator_node(state: dict) -> dict:
-    """The LangGraph wrapper for the Orchestrator."""
+    """The LangGraph wrapper for the Orchestrator. Retries once on failure."""
     start_time = time.time()
 
-    try:
-        brief = synthesise_brief(
-            price_data=state.get("price_data", {}),
-            risk_data=state.get("risk_data", {}),
-            report_data=state.get("report_data", {}),
-            weather_data=state.get("weather_data", {}),
-            quantity_kg=state.get("quantity_kg", 0)
-        )
-        success = True
-    except Exception as e:
-        print(f"Orchestrator error: {e}")
-        brief = {
-            "fair_price_range": "Unable to calculate",
-            "minimum_acceptable_price": 0.0,
-            "leverage_points": ["Data unavailable — please retry"],
-            "negotiation_script": ["Please try again with a different region"],
-            "confidence_score": 1
-        }
-        success = False
+    for attempt in range(2):
+        try:
+            brief = synthesise_brief(
+                price_data=state.get("price_data", {}),
+                risk_data=state.get("risk_data", {}),
+                report_data=state.get("report_data", {}),
+                weather_data=state.get("weather_data", {}),
+                quantity_kg=state.get("quantity_kg", 0)
+            )
+            return {"negotiation_brief": brief, "orchestrator_runtime": time.time() - start_time}
 
-    return {"negotiation_brief": brief}
+        except Exception as e:
+            if attempt == 0:
+                print(f"[Orchestrator] Attempt 1 failed: {type(e).__name__}: {e} — retrying...")
+            else:
+                print(f"[Orchestrator] Failed after retry: {type(e).__name__}: {e}")
+                return {"negotiation_brief": {
+                    "fair_price_range":         "Unable to calculate — please retry",
+                    "minimum_acceptable_price": 0.0,
+                    "leverage_points":          ["Data unavailable — please retry"],
+                    "negotiation_script":       ["Please try again"],
+                    "confidence_score":         1
+                }}
