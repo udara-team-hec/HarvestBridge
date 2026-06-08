@@ -8,8 +8,8 @@ from llama_index.core.node_parser import SentenceSplitter
 DOCUMENTS_DIR = "rag/documents"
 CHROMA_STORE_DIR = "rag/chroma_store"
 COLLECTION_NAME = "harvestbridge_knowledge"
-CHUNK_SIZE = 400
-CHUNK_OVERLAP = 80
+CHUNK_SIZE = 1024
+CHUNK_OVERLAP = 128
 
 def ingest_documents():
     """Loads PDFs, chunks them, embeds them, and stores in ChromaDB."""
