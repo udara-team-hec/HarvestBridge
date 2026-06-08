@@ -2,42 +2,52 @@ LOCATIONS = {
     "Nigeria": {
         "currency": "NGN",
         "states": {
-            "Lagos": {
-                "Lagos Island": "Lagos Island, Lagos, NG",
-                "Epe":          "Epe, Lagos, NG",
-                "Badagry":      "Badagry, Lagos, NG",
-                "Ikorodu":      "Ikorodu, Lagos, NG",
-            },
             "Kano": {
-                "Kano City": "Kano, Kano, NG",
-                "Wudil":     "Wudil, Kano, NG",
-                "Gwarzo":    "Gwarzo, Kano, NG",
+                "Kano City":     "Kano, Kano, NG",
+                "Wudil":         "Wudil, Kano, NG",
+                "Gwarzo":        "Gwarzo, Kano, NG",
             },
-            "Benue": {
-                "Makurdi": "Makurdi, Benue, NG",
-                "Gboko":   "Gboko, Benue, NG",
-                "Otukpo":  "Otukpo, Benue, NG",
-            },
-            "Ondo": {
-                "Akure":      "Akure, Ondo, NG",
-                "Ondo Town":  "Ondo, Ondo, NG",
-                "Okitipupa":  "Okitipupa, Ondo, NG",
-            },
-            "Katsina": {
-                "Katsina City": "Katsina, Katsina, NG",
-                "Daura":        "Daura, Katsina, NG",
+            "Lagos": {
+                "Lagos Market":  "Lagos, Lagos, NG",
+                "Badagry":       "Badagry, Lagos, NG",
             },
             "Kaduna": {
-                "Kaduna City": "Kaduna, Kaduna, NG",
-                "Zaria":       "Zaria, Kaduna, NG",
+                "Kaduna City":   "Kaduna, Kaduna, NG",
+                "Zaria":         "Zaria, Kaduna, NG",
+                "Saminaka":      "Saminaka, Kaduna, NG",
             },
-            "Rivers": {
-                "Port Harcourt": "Port Harcourt, Rivers, NG",
-                "Ahoada":        "Ahoada, Rivers, NG",
+            "Katsina": {
+                "Katsina City":  "Katsina, Katsina, NG",
+                "Dandume":       "Dandume, Katsina, NG",
+                "Daura":         "Daura, Katsina, NG",
             },
-            "Abuja": {
-                "Gwagwalada": "Gwagwalada, Abuja, NG",
-                "Kuje":       "Kuje, Abuja, NG",
+            "Borno": {
+                "Maiduguri":     "Maiduguri, Borno, NG",
+                "Biu":           "Biu, Borno, NG",
+                "Damboa":        "Damboa, Borno, NG",
+            },
+            "Yobe": {
+                "Damaturu":      "Damaturu, Yobe, NG",
+                "Potiskum":      "Potiskum, Yobe, NG",
+                "Gashua":        "Gashua, Yobe, NG",
+            },
+            "Adamawa": {
+                "Jimeta":        "Jimeta, Adamawa, NG",
+                "Mubi":          "Mubi, Adamawa, NG",
+                "Michika":       "Michika, Adamawa, NG",
+            },
+            "Oyo": {
+                "Ibadan":        "Ibadan, Oyo, NG",
+            },
+            "Abia": {
+                "Aba":           "Aba, Abia, NG",
+            },
+            "Gombe": {
+                "Gombe City":    "Gombe, Gombe, NG",
+            },
+            "Sokoto": {
+                "Illela":        "Illela, Sokoto, NG",
+                "Sokoto City":   "Sokoto, Sokoto, NG",
             },
         }
     },
@@ -45,27 +55,43 @@ LOCATIONS = {
         "currency": "ETB",
         "states": {
             "Amhara": {
-                "Bahir Dar": "Bahir Dar, Amhara, ET",
-                "Gondar":    "Gondar, Amhara, ET",
-                "Dessie":    "Dessie, Amhara, ET",
+                "Bahir Dar":     "Bahir Dar, Amhara, ET",
+                "Gondar":        "Gondar, Amhara, ET",
+                "Dessie":        "Dessie, Amhara, ET",
+                "Debre Birhan":  "Debre Birhan, Amhara, ET",
             },
             "Oromia": {
-                "Jimma":   "Jimma, Oromia, ET",
-                "Adama":   "Adama, Oromia, ET",
-                "Nekemte": "Nekemte, Oromia, ET",
+                "Jimma":         "Jimma, Oromia, ET",
+                "Adama":         "Adama, Oromia, ET",
+                "Assela":        "Assela, Oromia, ET",
+                "Chiro":         "Chiro, Oromia, ET",
             },
             "Addis Ababa": {
-                "Mercato": "Mercato, Addis Ababa, ET",
-                "Kaliti":  "Kaliti, Addis Ababa, ET",
+                "Addis Ababa":   "Addis Ababa, ET",
+            },
+            "SNNPR": {
+                "Hawassa":       "Hawassa, SNNPR, ET",
+                "Arba Minch":    "Arba Minch, SNNPR, ET",
+            },
+            "Tigray": {
+                "Mekelle":       "Mekelle, Tigray, ET",
+                "Axum":          "Axum, Tigray, ET",
             },
         }
     }
 }
 
-CROPS = [
-    "Maize", "Cassava", "Gari", "Rice", "Yam",
-    "Beans", "Millet", "Sorghum", "Sesame"
-]
+# Country-aware crop lists — prevents Nigerian farmer selecting Teff
+# and Ethiopian farmer selecting Gari
+CROPS_BY_COUNTRY = {
+    "Nigeria": [
+        "Maize", "Gari", "Rice", "Yam",
+        "Sorghum", "Millet", "Beans", "Onions",
+    ],
+    "Ethiopia": [
+        "Maize", "Teff", "Sorghum", "Wheat",
+    ]
+}
 
 STORAGE_TYPES = [
     "None (selling from field)",

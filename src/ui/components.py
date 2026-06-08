@@ -1,6 +1,6 @@
 import streamlit as st
 from src.ui.config import (
-    LOCATIONS, CROPS, STORAGE_TYPES,
+    LOCATIONS, CROPS_BY_COUNTRY, STORAGE_TYPES,
     STORAGE_MAP, RISK_COLOURS
 )
 
@@ -19,9 +19,11 @@ def render_sidebar() -> dict:
     with st.sidebar:
         st.header("Your Harvest Details")
 
-        crop = st.selectbox("Crop", CROPS)
-
+        # Country must come first — crop list depends on it
         country = st.selectbox("Country", list(LOCATIONS.keys()))
+
+        available_crops = CROPS_BY_COUNTRY[country]
+        crop = st.selectbox("Crop", available_crops)
 
         state_options = list(LOCATIONS[country]["states"].keys())
         state = st.selectbox("State / Region", state_options)
@@ -53,6 +55,7 @@ def render_sidebar() -> dict:
 
     return {
         "crop":         crop,
+        "country":      country,
         "location":     location_full,
         "region":       state,
         "quantity_kg":  quantity_kg,

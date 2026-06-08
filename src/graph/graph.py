@@ -10,6 +10,7 @@ from src.agents.orchestrator import orchestrator_node
 
 class GraphState(TypedDict):
     crop: str
+    country:str
     location: str
     region: str
     quantity_kg: float

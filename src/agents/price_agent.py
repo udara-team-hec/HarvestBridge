@@ -2,27 +2,34 @@ import sqlite3
 import time
 from src.schemas.models import TrendDirection
 
-CROP_COLUMN_MAP = {
-    "cassava":  "c_gari_fao",
-    "gari":     "c_gari_fao",
-    "maize":    "c_maize_fao",
-    "rice":     "c_rice_fao",
-    "yam":      "c_yam",
-    "beans":    "c_beans",
-    "millet":   "c_millet_fao",
-    "sorghum":  "c_sorghum_fao"
+CROP_COUNTRY_COLUMN_MAP = {
+    "Nigeria": {
+        "maize":   "c_maize_fao",
+        "corn":    "c_maize_fao",
+        "gari":    "c_gari_fao",
+        "cassava": "c_gari_fao",
+        "rice":    "c_rice_fao",
+        "yam":     "c_yam",
+        "sorghum": "c_sorghum_fao",
+        "millet":  "c_millet_fao",
+        "beans":   "c_beans",
+        "onions":  "c_onions",
+    },
+    "Ethiopia": {
+        "maize":   "c_maize",
+        "teff":    "c_teff_fao",
+        "sorghum": "c_sorghum",
+        "wheat":   "c_wheat",
+    }
 }
 
-REGION_CURRENCY_MAP = {
-    "nigeria":  "NGN",
-    "ethiopia": "ETB",
-}
 
+def analyze_price(crop: str, region: str, currency: str = "NGN", country: str = "Nigeria") -> dict:
+    country_map = CROP_COUNTRY_COLUMN_MAP.get(country, CROP_COUNTRY_COLUMN_MAP["Nigeria"])
+    db_column = country_map.get(crop.lower())
 
-def analyze_price(crop: str, region: str, currency: str = "NGN") -> dict:
-    db_column = CROP_COLUMN_MAP.get(crop.lower())
     if not db_column:
-        raise ValueError(f"Crop '{crop}' not found in database schema.")
+        raise ValueError(f"Crop '{crop}' is not available for {country}.")
 
     conn = sqlite3.connect("data/harvestbridge.db")
     cursor = conn.cursor()
@@ -45,17 +52,20 @@ def analyze_price(crop: str, region: str, currency: str = "NGN") -> dict:
 
     avg_price, high_12m, low_12m, avg_3m, latest_date, data_points = row
 
+    # Clean timestamp to date only
+    clean_date = latest_date.split(" ")[0] if latest_date else "unknown"
+
     # Guard — no data found for this region/crop combination
     if not avg_price:
         return {
-            "crop": crop,
-            "region": region,
-            "currency": currency,
-            "avg_price": 0.0,
-            "trend_direction": TrendDirection.STABLE,
-            "price_12m_high": 0.0,
-            "price_12m_low": 0.0,
-            "latest_data_date": latest_date.split(" ")[0] if latest_date else "unknown",
+            "crop":             crop,
+            "region":           region,
+            "currency":         currency,
+            "avg_price":        0.0,
+            "trend_direction":  TrendDirection.STABLE,
+            "price_12m_high":   0.0,
+            "price_12m_low":    0.0,
+            "latest_data_date": clean_date,
             "data_points_count": 0,
         }
 
@@ -67,14 +77,14 @@ def analyze_price(crop: str, region: str, currency: str = "NGN") -> dict:
         trend = TrendDirection.STABLE
 
     return {
-        "crop": crop,
-        "region": region,
-        "currency": currency,
-        "avg_price": round(avg_price, 2),
-        "trend_direction": trend,
-        "price_12m_high": round(high_12m, 2),
-        "price_12m_low": round(low_12m, 2),
-        "latest_data_date": latest_date or "unknown",
+        "crop":             crop,
+        "region":           region,
+        "currency":         currency,
+        "avg_price":        round(avg_price, 2),
+        "trend_direction":  trend,
+        "price_12m_high":   round(high_12m, 2),
+        "price_12m_low":    round(low_12m, 2),
+        "latest_data_date": clean_date,
         "data_points_count": data_points or 0,
     }
 
@@ -85,18 +95,20 @@ async def price_agent_node(state: dict) -> dict:
     crop_input     = state.get("crop")
     region_input   = state.get("region")
     currency_input = state.get("currency", "NGN")
+    country_input  = state.get("country", "Nigeria")
 
     price_result = analyze_price(
         crop=crop_input,
         region=region_input,
-        currency=currency_input
+        currency=currency_input,
+        country=country_input
     )
 
     execution_time = time.time() - start_time
     price_result["execution_log"] = {
-        "agent_runtime": execution_time,
+        "agent_runtime":  execution_time,
         "success_status": True,
-        "token_usage": 0
+        "token_usage":    0
     }
 
     return {"price_data": price_result}
