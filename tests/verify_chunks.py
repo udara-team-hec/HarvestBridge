@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv(override= True)
 import chromadb
 from chromadb.utils import embedding_functions
 
