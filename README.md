@@ -1,6 +1,6 @@
 # 🌍 HarvestBridge: Proactive AI for African Agriculture
 
-[![Live Demo](https://huggingface.co/spaces/CharlyiE/HarvestBridge)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-HuggingFace-yellow)](https://huggingface.co/spaces/CharlyiE/HarvestBridge)
 **HarvestBridge** is a multi-agent AI orchestration platform designed to arm African smallholder farmers with localized market intelligence and negotiation strategies to help combat the region's estimated 40% post-harvest loss rate.
 
 ## 💡 The Mission
@@ -23,16 +23,14 @@ Middlemen often leverage information asymmetry to artificially suppress farm-gat
 
 ```bash
 # 1. Clone and setup environment
-git clone [https://github.com/](https://github.com/)[YOUR_GITHUB_USERNAME]/HarvestBridge.git
+git clone https://github.com/YOUR_GITHUB_USERNAME/HarvestBridge.git
 cd HarvestBridge
-uv venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+uv sync
 
 # 2. Add API keys to .env
 # GROQ_API_KEY, OPENWEATHERMAP_API_KEY, TWILIO setup
 
 # 3. Init DB and run app
-uv run python setup_db.py
-uv run python ingest.py
-uv run streamlit run app.py
+uv run python data/rebuild_db.py
+uv run python rag/ingest.py
+uv run streamlit run main.py
