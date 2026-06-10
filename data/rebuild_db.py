@@ -135,6 +135,26 @@ def create_schema(cursor):
 
     print("✓ Schema created with full column set")
 
+def create_farmers_registry(cursor):
+    """Creates the farmers registry table for WhatsApp notifications."""
+    cursor.execute("DROP TABLE IF EXISTS farmers_registry")
+    cursor.execute("""
+        CREATE TABLE farmers_registry (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            name                TEXT NOT NULL,
+            phone_number        TEXT NOT NULL UNIQUE,
+            crop                TEXT NOT NULL,
+            region              TEXT NOT NULL,
+            country             TEXT NOT NULL DEFAULT 'Nigeria',
+            currency            TEXT NOT NULL DEFAULT 'NGN',
+            quantity_kg         REAL DEFAULT 1000.0,
+            price_threshold_pct REAL DEFAULT 10.0,
+            registered_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_notified_at    TIMESTAMP NULL
+        )
+    """)
+    print("✓ farmers_registry table created")
+
 
 def load_nga(cursor, csv_path):
     """Load Nigeria RTFP data."""
@@ -305,6 +325,7 @@ def rebuild():
     cursor = conn.cursor()
 
     create_schema(cursor)
+    create_farmers_registry(cursor)
 
     nga_count = load_nga(cursor, NGA_CSV)
     eth_count = load_eth(cursor, ETH_CSV)

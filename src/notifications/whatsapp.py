@@ -64,3 +64,6 @@ def build_alert_message(
         f"👉 Open HarvestBridge for your full Negotiation Brief.\n\n"
         f"Reply STOP to unsubscribe."
     )
+
+# Alias for backwards compatibility
+send_whatsapp = send_whatsapp_alert
