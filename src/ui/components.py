@@ -1,3 +1,5 @@
+import os
+import sqlite3
 import streamlit as st
 from src.ui.config import (
     LOCATIONS, CROPS_BY_COUNTRY, STORAGE_TYPES,
@@ -15,21 +17,18 @@ def confidence_colour(score: int) -> str:
 
 
 def render_sidebar() -> dict:
-    """Renders all sidebar inputs and returns the collected values."""
     with st.sidebar:
         st.header("Your Harvest Details")
 
-        # Country must come first — crop list depends on it
-        country = st.selectbox("Country", list(LOCATIONS.keys()))
-
+        country = st.selectbox("Country", list(LOCATIONS.keys()), key="main_country")
         available_crops = CROPS_BY_COUNTRY[country]
-        crop = st.selectbox("Crop", available_crops)
+        crop = st.selectbox("Crop", available_crops, key="main_crop")
 
         state_options = list(LOCATIONS[country]["states"].keys())
-        state = st.selectbox("State / Region", state_options)
+        state = st.selectbox("State / Region", state_options, key="main_state")
 
         market_options = list(LOCATIONS[country]["states"][state].keys())
-        market = st.selectbox("Local Market", market_options)
+        market = st.selectbox("Local Market", market_options, key="main_market")
 
         currency = LOCATIONS[country]["currency"]
         st.info(f"Currency: **{currency}**")
@@ -39,10 +38,11 @@ def render_sidebar() -> dict:
             min_value=1.0,
             max_value=100000.0,
             value=1000.0,
-            step=100.0
+            step=100.0,
+            key="main_quantity"
         )
 
-        storage_display = st.selectbox("Storage Type", STORAGE_TYPES)
+        storage_display = st.selectbox("Storage Type", STORAGE_TYPES, key="main_storage")
         storage_type = STORAGE_MAP[storage_display]
 
         st.divider()
@@ -50,6 +50,8 @@ def render_sidebar() -> dict:
             "🚀 Generate Negotiation Brief",
             use_container_width=True
         )
+        st.divider()
+        render_registration_form()
 
     location_full = LOCATIONS[country]["states"][state][market]
 
@@ -232,3 +234,93 @@ def render_empty_state():
     3. **Receive** a data-grounded negotiation brief with exact prices,
        risk analysis, and a script to use with your buyer
     """)
+
+
+
+
+def register_farmer(
+    name: str,
+    phone: str,
+    crop: str,
+    region: str,
+    country: str,
+    currency: str,
+    threshold_pct: float
+) -> bool:
+    """Saves farmer registration to the database."""
+    db_path = os.getenv("DB_PATH", "data/harvestbridge.db")
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO farmers_registry
+                (name, phone_number, crop, region, country, currency, price_threshold_pct)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (name, phone, crop, region, country, currency, threshold_pct))
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False  # duplicate phone number
+    except Exception as e:
+        print(f"Registration error: {e}")
+        return False
+
+
+def render_registration_form():
+    """Renders the farmer registration form for WhatsApp alerts."""
+    with st.expander("🔔 Register for Price Alerts"):
+        st.caption("Get WhatsApp notifications when your crop price changes.")
+
+        with st.form("registration_form"):
+            reg_name    = st.text_input("Your Name", key="reg_name")
+            reg_phone   = st.text_input(
+                "WhatsApp Number",
+                placeholder="+2348012345678",
+                key="reg_phone"
+            )
+            reg_country = st.selectbox(
+                "Country",
+                list(LOCATIONS.keys()),
+                key="reg_country"
+            )
+            reg_crop = st.selectbox(
+                "Crop",
+                CROPS_BY_COUNTRY[reg_country],
+                key="reg_crop"
+            )
+            reg_state = st.selectbox(
+                "State / Region",
+                list(LOCATIONS[reg_country]["states"].keys()),
+                key="reg_state"
+            )
+            reg_threshold = st.slider(
+                "Alert me when price moves by (%)",
+                min_value=5,
+                max_value=30,
+                value=10,
+                step=5,
+                key="reg_threshold"
+            )
+            submitted = st.form_submit_button("Register")
+
+        if submitted:
+            if not reg_name or not reg_phone:
+                st.error("Name and phone number are required.")
+            else:
+                success = register_farmer(
+                    name=reg_name,
+                    phone=reg_phone,
+                    crop=reg_crop,
+                    region=reg_state,
+                    country=reg_country,
+                    currency=LOCATIONS[reg_country]["currency"],
+                    threshold_pct=float(reg_threshold)
+                )
+                if success:
+                    st.success(
+                        f"✅ Registered! You will receive WhatsApp alerts "
+                        f"when {reg_crop} prices move by {reg_threshold}%."
+                    )
+                else:
+                    st.error("Registration failed. This number may already be registered.")

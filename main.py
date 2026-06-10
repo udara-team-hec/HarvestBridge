@@ -5,11 +5,13 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 from src.graph.graph import pipeline
+from src.notifications.scheduler import start_scheduler
 from src.ui.components import (
     render_sidebar,
     render_trace_panel,
     render_results,
     render_empty_state,
+    render_registration_form,
 )
 
 
@@ -27,6 +29,12 @@ st.title("🌾 HarvestBridge")
 st.caption("AI-powered negotiation coaching for smallholder farmers in Africa")
 st.divider()
 
+# Start scheduler once per Streamlit session
+if "scheduler_started" not in st.session_state:
+    start_scheduler()
+    st.session_state["scheduler_started"] = True
+
+# Single call — registration form is rendered inside render_sidebar
 inputs = render_sidebar()
 
 if inputs["run"]:
@@ -49,7 +57,6 @@ if inputs["run"]:
 
     placeholders = render_trace_panel()
 
-    # Set all agents to pending before pipeline starts
     pending_labels = {
         "price":        "Price Agent — fetching market data",
         "weather":      "Weather Agent — fetching forecast",
